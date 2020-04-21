@@ -14,17 +14,21 @@ DB_GEONAMES="geonames2"
 # Otherwise entire commit hash or leave blank
 VERSION="2.0"
 
-# Target URL for geonames Geopackage, including file name
-# Australia only, for testing:
-#URL_DB_DATA="https://biogeo.ucdavis.edu/data/gadm3.6/gpkg/gadm36_AUS_gpkg.zip"
+# Target URL for geonames data
 # Complete GADM world package:
 URL_DB_DATA="http://download.geonames.org/export/dump/"
+
+# Separate directory for postal codes
+URL_PCODES="https://download.geonames.org/export/zip/"
 
 # Data version
 DB_DATA_VERSION="2020-04-21"
 
 # Base application directory
 APP_BASE_DIR="/home/boyle/bien/geonames";
+
+# Applications source code directory
+APP_DIR="${APP_BASE_DIR}/src"
 
 # Path to db_config.sh
 # For production, keep outside app working directory & supply
@@ -48,7 +52,7 @@ functions_path="${APP_BASE_DIR}/src/includes"
 # forward slash at start).
 # Recommend keeping outside app directory
 # Omit trailing slash
-DATA_BASE_DIR="${APP_BASE_DIR}/data"
+DATA_DIR="${APP_BASE_DIR}/data"
 
 # Makes user_admin the owner of the db and all objects in db
 # If leave user_admin blank ("") then database will be owned
