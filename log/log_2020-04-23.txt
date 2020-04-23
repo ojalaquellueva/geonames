@@ -1,0 +1,13 @@
+
+------ Process started at Thu Apr 23 08:53:56 PDT 2020 ------
+
+Changing database ownership and permissions:
+- Changing DB owner to 'bien'...done (12.59 sec)
+- Granting permissions...done
+- Transferring ownership to user 'bien':
+-- Tables...done (1.12 sec)
+-- Sequences...done (.11 sec)
+- Granting read access to "bien_private"...done
+
+------ Process 'Build database geonames2' completed in 13.96 seconds ------
+

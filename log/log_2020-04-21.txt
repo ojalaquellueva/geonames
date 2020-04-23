@@ -1,8 +1,4 @@
 
------- Process started at Tue Apr 21 14:52:54 PDT 2020 ------
+------ Process started at Tue Apr 21 17:27:32 PDT 2020 ------
 
-Dropping database 'geonames2'...done (2.21 sec)
-Creating database 'geonames2'...done (.42 sec)
-Adding unaccent extension...done
-Creating geonames tables....done (.20 sec)
-Importing geonames files to directory /home/boyle/bien/geonames/src:
+Indexing tables...

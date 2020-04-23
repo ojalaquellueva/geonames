@@ -1,6 +1,48 @@
--- 
+-- ----------------------------------------------------
 -- Adds indexes and constraints on geonames tables
+-- ----------------------------------------------------
+
+--
+-- Drop existing constraints if any
 -- 
+ALTER TABLE ONLY alternatename DROP CONSTRAINT IF EXISTS alternatenameid_pkey;
+ALTER TABLE ONLY geoname DROP CONSTRAINT IF EXISTS geonameid_pkey;
+ALTER TABLE ONLY countryinfo DROP CONSTRAINT IF EXISTS iso_alpha2_pkey;
+ALTER TABLE ONLY countryinfo DROP CONSTRAINT IF EXISTS countryinfo_geonameid_fkey;
+ALTER TABLE ONLY alternatename DROP CONSTRAINT IF EXISTS alternatename_geonameid_fkey;
+
+--
+-- Drop existing indexes if any
+-- 
+DROP INDEX IF EXISTS countryinfo_geonameid_idx;
+DROP INDEX IF EXISTS alternatename_geonameid_idx;
+DROP INDEX IF EXISTS geoname_name_idx;
+DROP INDEX IF EXISTS geoname_asciiname_idx;
+DROP INDEX IF EXISTS geoname_fclass_idx;
+DROP INDEX IF EXISTS geoname_fcode_idx;
+DROP INDEX IF EXISTS geoname_country_idx;
+DROP INDEX IF EXISTS geoname_cc2_idx;
+DROP INDEX IF EXISTS geoname_admin1_idx;
+DROP INDEX IF EXISTS geoname_admin2_idx;
+DROP INDEX IF EXISTS geoname_admin3_idx;
+DROP INDEX IF EXISTS geoname_admin4_idx;
+DROP INDEX IF EXISTS alternatename_isolanguage_idx;
+DROP INDEX IF EXISTS alternatename_alternatename_idx;
+DROP INDEX IF EXISTS alternatename_ispreferredname_idx;
+DROP INDEX IF EXISTS alternatename_isshortname_idx;
+DROP INDEX IF EXISTS alternatename_iscolloquial_idx;
+DROP INDEX IF EXISTS alternatename_ishistoric_idx;
+DROP INDEX IF EXISTS postalcodes_countrycode_idx;
+DROP INDEX IF EXISTS postalcodes_admin1name_idx;
+DROP INDEX IF EXISTS postalcodes_admin1code_idx;
+DROP INDEX IF EXISTS postalcodes_admin2name_idx;
+DROP INDEX IF EXISTS postalcodes_admin2code_idx;
+DROP INDEX IF EXISTS postalcodes_admin3name_idx;
+DROP INDEX IF EXISTS postalcodes_admin3code_idx;
+
+-- 
+-- Create constraints and indexes
+--
 
 -- PKs
 ALTER TABLE ONLY alternatename

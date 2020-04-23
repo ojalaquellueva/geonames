@@ -3,7 +3,13 @@
 ##############################################################
 # Application parameters
 # Check and change as needed
+# Omit trailing slash after all paths!
 ##############################################################
+
+# Base application directory
+# Absolute path to directory above main source code directory
+# This is the directory into which you unpack the repo
+APP_BASE_DIR="/home/boyle/bien/geonames";
 
 # Name of the Geonames database
 # Call it what you want, allows you to have multiple versions
@@ -23,9 +29,6 @@ URL_PCODES="https://download.geonames.org/export/zip/"
 
 # Data version
 DB_DATA_VERSION="2020-04-21"
-
-# Base application directory
-APP_BASE_DIR="/home/boyle/bien/geonames";
 
 # Applications source code directory
 APP_DIR="${APP_BASE_DIR}/src"
@@ -71,7 +74,7 @@ USER_READ="bien_private"	# Read only user
 ##############################################################
 
 # Names of files from geonames download
-FILES="allCountries.zip alternateNames.zip userTags.zip admin1CodesASCII.txt admin2Codes.txt countryInfo.txt featureCodes_en.txt iso-languagecodes.txt timeZones.txt"
+FILES="allCountries.zip alternateNames.zip alternateNamesV2.zip userTags.zip admin1CodesASCII.txt admin2Codes.txt countryInfo.txt featureCodes_en.txt iso-languagecodes.txt timeZones.txt hierarchy.zip"
 
 # Postal code data directory
 # This should be a subdirectory of the data directory

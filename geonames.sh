@@ -74,8 +74,8 @@ msg_conf="$(cat <<-EOF
 
 Run process '$pname' using the following parameters: 
 
-Geonames main data url:		$URL_DB_DATA
-Geonames pcodes url:		$URL_PCODES
+Geonames main:			$URL_DB_DATA
+Geonames postal codes:		$URL_PCODES
 Geonames version:		$DB_DATA_VERSION
 Data directory:			$DATA_DIR
 Geonames DB name:		$DB_GEONAMES
@@ -107,7 +107,10 @@ COMMENT_BLOCK_x
 sudo pwd >/dev/null
 
 
-#: <<'COMMENT_BLOCK_1'
+
+echo "***** WARNING: script block(s) deactivated! ****"
+: <<'COMMENT_BLOCK_1'
+
 
 
 # Check if db already exists
@@ -175,9 +178,6 @@ for i in $FILES; do
 	fi
 done
 
-
-#COMMENT_BLOCK_1
-
 # Move to data directory 
 pcpath=$DATA_DIR"/"$PCDIR
 mkdir -p $pcpath
@@ -189,13 +189,6 @@ wget -q -N "${URL_PCODES}/allCountries.zip"
 unzip -u -q $pcpath/allCountries.zip
 echoi  $e -l "done"
 
-
-
-
-echo ""; echo "EXITING script `basename "$BASH_SOURCE"`"; exit 0
-
-
-
 ############################################
 # Insert the data
 ############################################
@@ -203,63 +196,79 @@ echo ""; echo "EXITING script `basename "$BASH_SOURCE"`"; exit 0
 # Back to original working directory
 cd "$DIR"
 
+echoi $e -n "Clearing tables..."
+sudo -Hiu postgres PGOPTIONS='--client-min-messages=warning' psql $DB_GEONAMES --set ON_ERROR_STOP=1 -q <<EOT
+TRUNCATE geoname;
+TRUNCATE postalcodes;
+TRUNCATE timezones;
+TRUNCATE featurecodes;
+TRUNCATE admin1codesascii;
+TRUNCATE admin2codesascii;
+TRUNCATE iso_languagecodes;
+TRUNCATE countryinfo;
+TRUNCATE alternatename;
+TRUNCATE continentcodes;
+EOT
+source "$includes_dir/check_status.sh"
+
 echoi $e "Inserting data to tables:"
 
 echoi $e -n "- geoname..."
-PGOPTIONS='--client-min-messages=warning' psql $DB_GEONAMES --set ON_ERROR_STOP=1 -q <<EOT
+sudo -Hiu postgres PGOPTIONS='--client-min-messages=warning' psql $DB_GEONAMES --set ON_ERROR_STOP=1 -q <<EOT
 copy geoname (geonameid,name,asciiname,alternatenames,latitude,longitude,fclass,fcode,country,cc2,admin1,admin2,admin3,admin4,population,elevation,gtopo30,timezone,moddate) from '${DATA_DIR}/allCountries.txt' null as '';
 EOT
 source "$includes_dir/check_status.sh"
 
-PGOPTIONS='--client-min-messages=warning' psql $DB_GEONAMES --set ON_ERROR_STOP=1 -q <<EOT
+echoi $e -n "- postalcodes..."
+sudo -Hiu postgres PGOPTIONS='--client-min-messages=warning' psql $DB_GEONAMES --set ON_ERROR_STOP=1 -q <<EOT
 copy postalcodes (countrycode,postalcode,placename,admin1name,admin1code,admin2name,admin2code,admin3name,admin3code,latitude,longitude,accuracy) from '${DATA_DIR}/${PCDIR}/allCountries.txt' WITH CSV DELIMITER E'\t' QUOTE E'\b' NULL AS '';
 EOT
 source "$includes_dir/check_status.sh"
 
 echoi $e -n "- timezones..."
-PGOPTIONS='--client-min-messages=warning' psql $DB_GEONAMES --set ON_ERROR_STOP=1 -q <<EOT
+sudo -Hiu postgres PGOPTIONS='--client-min-messages=warning' psql $DB_GEONAMES --set ON_ERROR_STOP=1 -q <<EOT
 copy timezones (countrycode,timezoneid,gmt_offset,dst_offset,raw_offset) from '${DATA_DIR}/timeZones.txt.tmp' null as '';
 EOT
 source "$includes_dir/check_status.sh"
 
 echoi $e -n "- featurecodes..."
-PGOPTIONS='--client-min-messages=warning' psql $DB_GEONAMES --set ON_ERROR_STOP=1 -q <<EOT
+sudo -Hiu postgres PGOPTIONS='--client-min-messages=warning' psql $DB_GEONAMES --set ON_ERROR_STOP=1 -q <<EOT
 copy featurecodes (code,name,description) from '${DATA_DIR}/featureCodes_en.txt' null as '';
 EOT
 source "$includes_dir/check_status.sh"
 
-echoi $e -n "- admin1CodesAscii..."
-PGOPTIONS='--client-min-messages=warning' psql $DB_GEONAMES --set ON_ERROR_STOP=1 -q <<EOT
+echoi $e -n "- admin1codesascii..."
+sudo -Hiu postgres PGOPTIONS='--client-min-messages=warning' psql $DB_GEONAMES --set ON_ERROR_STOP=1 -q <<EOT
 copy admin1codesascii (code,name,nameascii,geonameid) from '${DATA_DIR}/admin1CodesASCII.txt' null as '';
 EOT
 source "$includes_dir/check_status.sh"
 
 echoi $e -n "- admin2codesascii..."
-PGOPTIONS='--client-min-messages=warning' psql $DB_GEONAMES --set ON_ERROR_STOP=1 -q <<EOT
+sudo -Hiu postgres PGOPTIONS='--client-min-messages=warning' psql $DB_GEONAMES --set ON_ERROR_STOP=1 -q <<EOT
 copy admin2codesascii (code,name,nameascii,geonameid) from '${DATA_DIR}/admin2Codes.txt' null as '';
 EOT
 source "$includes_dir/check_status.sh"
 
 echoi $e -n "- iso_languagecodes..."
-PGOPTIONS='--client-min-messages=warning' psql $DB_GEONAMES --set ON_ERROR_STOP=1 -q <<EOT
+sudo -Hiu postgres PGOPTIONS='--client-min-messages=warning' psql $DB_GEONAMES --set ON_ERROR_STOP=1 -q <<EOT
 copy iso_languagecodes (iso_639_3,iso_639_2,iso_639_1,language_name) from '${DATA_DIR}/iso-languagecodes.txt.tmp' null as '';
 EOT
 source "$includes_dir/check_status.sh"
 
 echoi $e -n "- countryinfo..."
-PGOPTIONS='--client-min-messages=warning' psql $DB_GEONAMES --set ON_ERROR_STOP=1 -q <<EOT
+sudo -Hiu postgres PGOPTIONS='--client-min-messages=warning' psql $DB_GEONAMES --set ON_ERROR_STOP=1 -q <<EOT
 copy countryinfo (iso_alpha2,iso_alpha3,iso_numeric,fips_code,country,capital,areainsqkm,population,continent,tld,currency_code,currency_name,phone,postal,postalregex,languages,geonameid,neighbours,equivalent_fips_code) from '${DATA_DIR}/countryInfo.txt.tmp' null as '';
 EOT
 source "$includes_dir/check_status.sh"
 
 echoi $e -n "- alternatename..."
-PGOPTIONS='--client-min-messages=warning' psql $DB_GEONAMES --set ON_ERROR_STOP=1 -q <<EOT
+sudo -Hiu postgres PGOPTIONS='--client-min-messages=warning' psql $DB_GEONAMES --set ON_ERROR_STOP=1 -q <<EOT
 copy alternatename (alternatenameid,geonameid,isolanguage,alternatename,ispreferredname, isshortname, iscolloquial, ishistoric) from '${DATA_DIR}/alternateNames.txt' null as '';
 EOT
 source "$includes_dir/check_status.sh"
 
 echoi $e -n "- continentcodes..."
-PGOPTIONS='--client-min-messages=warning' psql $DB_GEONAMES --set ON_ERROR_STOP=1 -q <<EOT
+sudo -Hiu postgres PGOPTIONS='--client-min-messages=warning' psql $DB_GEONAMES --set ON_ERROR_STOP=1 -q <<EOT
 INSERT INTO continentcodes VALUES ('AF', 'Africa', 6255146);
 INSERT INTO continentcodes VALUES ('AS', 'Asia', 6255147);
 INSERT INTO continentcodes VALUES ('EU', 'Europe', 6255148);
@@ -270,27 +279,67 @@ INSERT INTO continentcodes VALUES ('AN', 'Antarctica', 6255152);
 EOT
 source "$includes_dir/check_status.sh"
 
-
-echoi $e -n "Fixing postalcodes and admin codes tables...."
-PGOPTIONS='--client-min-messages=warning' psql $DB_GEONAMES --set ON_ERROR_STOP=1 -q -f sql/admincodes.sql
+echoi $e -n "Fixing postalcodes and admincodes tables..."
+sudo -Hiu postgres PGOPTIONS='--client-min-messages=warning' psql $DB_GEONAMES --set ON_ERROR_STOP=1 -q -f "${APP_DIR}/sql/admincodes.sql"
 source "$includes_dir/check_status.sh"
+
+############################################
+# Set ownership and permissions
+############################################
+
+if [ "$USER_ADMIN" != "" ]; then
+	echoi $e "Changing database ownership and permissions:"
+
+	echoi $e -n "- Changing DB owner to '$USER_ADMIN'..."
+	sudo -Hiu postgres PGOPTIONS='--client-min-messages=warning' psql --set ON_ERROR_STOP=1 -q -c "ALTER DATABASE $DB_GEONAMES OWNER TO $USER_ADMIN" 
+	source "$includes_dir/check_status.sh"  
+
+	echoi $e -n "- Granting permissions..."
+	sudo -Hiu postgres PGOPTIONS='--client-min-messages=warning' psql -q <<EOF
+	\set ON_ERROR_STOP on
+	REVOKE CONNECT ON DATABASE $DB_GEONAMES FROM PUBLIC;
+	GRANT CONNECT ON DATABASE $DB_GEONAMES TO $USER_ADMIN;
+	GRANT ALL PRIVILEGES ON DATABASE $DB_GEONAMES TO $USER_ADMIN;
+EOF
+	echoi $i "done"
+
+	echoi $e "- Transferring ownership to user '$USER_ADMIN':"
+	# Note: views not changed as all at this point are postgis relations
+
+	echoi $e -n "-- Tables..."
+	for tbl in `psql -qAt -c "select tablename from pg_tables where schemaname='public';" $DB_GEONAMES` ; do  sudo -Hiu postgres PGOPTIONS='--client-min-messages=warning' psql -q -c "alter table \"$tbl\" owner to $USER_ADMIN" $DB_GEONAMES ; done
+	source "$includes_dir/check_status.sh"  
+
+	echoi $e -n "-- Sequences..."
+	for tbl in `psql -qAt -c "select sequence_name from information_schema.sequences where sequence_schema = 'public';" $DB_GEONAMES` ; do  sudo -Hiu postgres PGOPTIONS='--client-min-messages=warning' psql -q -c "alter sequence \"$tbl\" owner to $USER_ADMIN" $DB_GEONAMES ; done
+	source "$includes_dir/check_status.sh"  
+fi
+
+if [[ ! "$USER_READ" == "" ]]; then
+	echoi $e -n "- Granting read access to \"$USER_READ\"..."
+	sudo -Hiu postgres PGOPTIONS='--client-min-messages=warning' psql -q <<EOF
+	\set ON_ERROR_STOP on
+	REVOKE CONNECT ON DATABASE $DB_GEONAMES FROM PUBLIC;
+	GRANT CONNECT ON DATABASE $DB_GEONAMES TO $USER_READ;
+	\c $DB_GEONAMES
+	GRANT USAGE ON SCHEMA public TO $USER_READ;
+	GRANT SELECT ON ALL TABLES IN SCHEMA public TO $USER_READ;
+EOF
+	echoi $i "done"
+fi 
 
 ######################################################
 # Add PKs, indexes and FK constraints
+# This takes a LOOOONG time! Hours!
 ######################################################
 
-echoi $e -n "Indexing tables...."
-PGOPTIONS='--client-min-messages=warning' psql $DB_GEONAMES --set ON_ERROR_STOP=1 -q -f sql/index_geonames_tables.sql
+echoi $e -n "Indexing tables..."
+sudo -Hiu postgres PGOPTIONS='--client-min-messages=warning' psql $DB_GEONAMES --set ON_ERROR_STOP=1 -q -f "${APP_DIR}/sql/index_geonames_tables.sql"
 source "$includes_dir/check_status.sh"
 
-######################################################
-# Adjust permissions as needed
-######################################################
-
-# Change owner to main user (bien) and assign read-only access to public_bien
-echoi $e -n "Adding permissions for users '$USER' and '$USER_READ'..."
-PGOPTIONS='--client-min-messages=warning' psql $DB_GEONAMES --set ON_ERROR_STOP=1 -q -v user_adm=$USER -v user_read=$USER_READ -f sql/set_permissions.sql
-source "$includes_dir/check_status.sh" 
+echoi $e -n "Optimizing indexes..."
+sudo -Hiu postgres PGOPTIONS='--client-min-messages=warning' psql --set ON_ERROR_STOP=1 -d $DB_GEONAMES -q -c "VACUUM ANALYZE $DB_GEONAMES"
+source "$includes_dir/check_status.sh"
 
 ######################################################
 # Report total elapsed time and exit
