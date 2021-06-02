@@ -144,6 +144,9 @@ source "$includes_dir/check_status.sh"
 # Import geonames files
 ############################################
 
+# Set date/time of access
+download_timestamp=$(date '+%F_%H:%M:%S')
+
 echoi $e "Importing geonames files to directory $(pwd):"
 cd "$DATA_DIR"
 
@@ -281,6 +284,14 @@ source "$includes_dir/check_status.sh"
 
 echoi $e -n "Fixing postalcodes and admincodes tables..."
 sudo -Hiu postgres PGOPTIONS='--client-min-messages=warning' psql $DB_GEONAMES --set ON_ERROR_STOP=1 -q -f "${APP_DIR}/sql/admincodes.sql"
+source "$includes_dir/check_status.sh"
+
+############################################
+# Create metadata table
+############################################
+
+echoi $e -n "Creating metadata table..."
+sudo -Hiu postgres PGOPTIONS='--client-min-messages=warning' psql $DB_GEONAMES --set ON_ERROR_STOP=1 -q -v VERSION="$VERSION" -v URL_DB_DATA="$URL_DB_DATA" -v DB_DATA_VERSION="$DB_DATA_VERSION" -v download_timestamp="$download_timestamp" -f "${APP_DIR}/sql/create_meta.sql"
 source "$includes_dir/check_status.sh"
 
 ############################################
